@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
 
 export interface IConnectionErrorDialogOptions {
-  open: boolean
-  onClose: () => any
+  open: boolean;
+  onClose: () => any;
 }
 
-export default function ConnectionErrorDialog(props: IConnectionErrorDialogOptions) {
+export default function ConnectionErrorDialog(
+  props: IConnectionErrorDialogOptions,
+) {
   const handleClose = (event: any, reason: any) => {
     if (reason && reason === "backdropClick") {
       return;

@@ -52,7 +52,9 @@ export interface IAssetReferencesTableOptions {
   assetRefs: AssetReference[];
 }
 
-export default function AssetReferencesTable(props: IAssetReferencesTableOptions) {
+export default function AssetReferencesTable(
+  props: IAssetReferencesTableOptions,
+) {
   return (
     <div>
       {props.assetRefs && (
@@ -68,7 +70,9 @@ export default function AssetReferencesTable(props: IAssetReferencesTableOptions
                   <TableCell component="th" scope="row">
                     {row.id}
                   </TableCell>
-                  <TableCell align="center">{row.numberTokens}</TableCell>
+                  <TableCell align="center">
+                    {row.numberTokens || row.amount}
+                  </TableCell>
                   <TableCell align="center">{row.recipient}</TableCell>
                 </TableRow>
               ))}

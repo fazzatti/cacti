@@ -1165,6 +1165,15 @@ export abstract class PluginSatpGateway
         if (err.response == undefined || err.response.status == 500) {
           if (!message.match("Rollback")) {
             await this.Revert(sessionID);
+            this.log.debug(
+              `TEMP========================= sending  message:  ${message}`,
+            );
+            this.log.debug(
+              `TEMP========================= SessionData:  ${JSON.stringify(sessionData)}`,
+            );
+            this.log.debug(
+              `TEMP========================= ERROR:  ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
+            );
             throw new Error(`${fnTag}, ${message} message failed. ${err}`);
           }
         }

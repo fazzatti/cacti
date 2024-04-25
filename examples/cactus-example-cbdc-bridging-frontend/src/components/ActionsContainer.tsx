@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 import Button, { ButtonProps } from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -8,11 +8,11 @@ import TransferDialog from "./dialogs/TransferDialog";
 import EscrowDialog from "./dialogs/EscrowDialog";
 import BridgeOutDialog from "./dialogs/BridgeOutDialog";
 import BridgeBackDialog from "./dialogs/BridgeBackDialog";
-import { getFabricBalance } from "../api-calls/fabric-api";
 import { getBesuBalance } from "../api-calls/besu-api";
 import { AssetReference } from "../models/AssetReference";
+import { getStellarBalance } from "../api-calls/stellar-api";
 
-const NormalButton = styled(Button)<ButtonProps>(({ theme }) => ({
+const NormalButton = styled(Button)<ButtonProps>(() => ({
   margin: "auto",
   width: "100%",
   fontSize: "13px",
@@ -20,12 +20,12 @@ const NormalButton = styled(Button)<ButtonProps>(({ theme }) => ({
   background: "#2B9BF6",
   color: "#FFFFFF",
   border: "0.5px solid #000000",
-  '&:disabled': {
+  "&:disabled": {
     border: "0",
   },
 }));
 
-const CriticalButton = styled(Button)<ButtonProps>(({ theme }) => ({
+const CriticalButton = styled(Button)<ButtonProps>(() => ({
   margin: "auto",
   width: "100%",
   fontSize: "13px",
@@ -37,15 +37,15 @@ const CriticalButton = styled(Button)<ButtonProps>(({ theme }) => ({
     backgroundColor: "#444444",
     color: "#FFFFFF",
   },
-  '&:disabled': {
+  "&:disabled": {
     border: "0",
   },
 }));
 
 export interface IActionsContainerOptions {
-    user: string;
-    ledger: string;
-    assetRefs: Array<AssetReference>
+  user: string;
+  ledger: string;
+  assetRefs: Array<AssetReference>;
 }
 
 export default function ActionsContainer(props: IActionsContainerOptions) {
@@ -60,8 +60,8 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
   useEffect(() => {
     async function fetchData() {
       let response;
-      if (props.ledger === "Fabric") {
-        response = await getFabricBalance(props.user);
+      if (props.ledger === "Stellar") {
+        response = await getStellarBalance(props.user);
         setAmount(response);
       } else if (props.ledger === "Besu") {
         response = await getBesuBalance(props.user);
@@ -78,25 +78,35 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
     <div>
       {loading ? (
         <center>
-          <CircularProgress  sx={{
-            marginTop: "1rem",
-          }}/>
+          <CircularProgress
+            sx={{
+              marginTop: "1rem",
+            }}
+          />
         </center>
       ) : (
         <Grid container spacing={1}>
-          <Grid item lg={5} sx={{
-            textAlign: "left",
-            fontSize: "17px",
-            marginBottom: "0.2rem",
-          }}>
+          <Grid
+            item
+            lg={5}
+            sx={{
+              textAlign: "left",
+              fontSize: "17px",
+              marginBottom: "0.2rem",
+            }}
+          >
             <span>{props.user}</span>
           </Grid>
           <Grid item lg={1} />
-          <Grid item lg={6} sx={{
-            textAlign: "right",
-            fontSize: "17px",
-            marginBottom: "0.2rem",
-          }}>
+          <Grid
+            item
+            lg={6}
+            sx={{
+              textAlign: "right",
+              fontSize: "17px",
+              marginBottom: "0.2rem",
+            }}
+          >
             <span>{amount} CBDC</span>
           </Grid>
 
@@ -117,7 +127,6 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
                 fullWidth
                 disabled={amount === 0}
                 onClick={() => setTransferDialog(true)}
-            
               >
                 Transfer
               </NormalButton>
@@ -128,7 +137,6 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
                 variant="contained"
                 disabled={amount === 0}
                 onClick={() => setTransferDialog(true)}
-            
               >
                 Transfer
               </NormalButton>
@@ -139,7 +147,6 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
                 variant="contained"
                 disabled={amount === 0}
                 onClick={() => setTransferDialog(true)}
-            
               >
                 Transfer
               </NormalButton>
@@ -151,13 +158,12 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
                 variant="contained"
                 disabled={amount === 0}
                 onClick={() => setEscrowDialog(true)}
-            
               >
                 Escrow
               </CriticalButton>
             </Grid>
           )}
-          {props.ledger === "Fabric" && props.user !== "Bridge" && (
+          {props.ledger === "Stellar" && props.user !== "Bridge" && (
             <Grid item xs={12} lg={6}>
               <CriticalButton
                 variant="contained"
@@ -182,7 +188,6 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
                   ).length === 0
                 }
                 onClick={() => setBridgeBackDialog(true)}
-            
               >
                 Bridge Back
               </CriticalButton>

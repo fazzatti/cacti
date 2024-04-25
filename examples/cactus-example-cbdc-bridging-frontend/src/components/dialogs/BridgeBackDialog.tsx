@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -15,9 +16,9 @@ import {
 import { AssetReference } from "../../models/AssetReference";
 
 export interface IBridgeBackDialogOptions {
-  user: string
-  open: boolean
-  onClose: () => any
+  user: string;
+  open: boolean;
+  onClose: () => any;
 }
 
 export default function BridgeBackDialog(props: IBridgeBackDialogOptions) {
@@ -29,7 +30,9 @@ export default function BridgeBackDialog(props: IBridgeBackDialogOptions) {
   useEffect(() => {
     async function fetchData() {
       const list = await getAssetReferencesBesu(props.user);
-      setAssetRefs(list.filter((asset: AssetReference) => asset.recipient === props.user));
+      setAssetRefs(
+        list.filter((asset: AssetReference) => asset.recipient === props.user),
+      );
     }
 
     if (props.open) {
@@ -48,14 +51,18 @@ export default function BridgeBackDialog(props: IBridgeBackDialogOptions) {
       setErrorMessage("Please choose a valid Asset Reference ID");
     } else {
       setSending(true);
-      const assetRef = assetRefs.find(
-        (asset) => asset.id === assetRefID,
-      );
+      const assetRef = assetRefs.find((asset) => asset.id === assetRefID);
       if (assetRef === undefined) {
         setErrorMessage("Something went wrong. Asset Reference not found");
         return;
       }
-      await bridgeBackTokensBesu(props.user, parseInt(assetRef.numberTokens), assetRefID);
+      await bridgeBackTokensBesu(
+        props.user,
+        assetRef.numberTokens
+          ? parseInt(assetRef.numberTokens)
+          : assetRef.amount ?? 0,
+        assetRefID,
+      );
       props.onClose();
     }
   };

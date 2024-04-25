@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import CryptoMaterial from "../crypto-material/crypto-material.json";
-import { getEthAddress, getEthUserPrKey, getFabricId } from "./common";
+import { getEthAddress, getEthUserPrKey, getStellarPk } from "./common";
 
 const BESU_CONTRACT_CBDC_ERC20_NAME = "CBDCcontract";
 const BESU_CONTRACT_ASSET_REF_NAME = "AssetReferenceContract";
@@ -33,7 +34,7 @@ export async function transferTokensBesu(
 export async function escrowTokensBesu(
   frontendUserFrom: string,
   amount: number,
-  assetRefID: string
+  assetRefID: string,
 ) {
   const from = getEthAddress(frontendUserFrom);
 
@@ -84,9 +85,13 @@ export async function getAssetReferencesBesu(frontendUser: string) {
   });
 }
 
-export async function bridgeBackTokensBesu(frontendUser: string, amount: number, assetRefID: string) {
+export async function bridgeBackTokensBesu(
+  frontendUser: string,
+  amount: number,
+  assetRefID: string,
+) {
   const address = getEthAddress(frontendUser);
-  const fabricID = getFabricId(frontendUser);
+  const stellarId = getStellarPk(frontendUser);
 
   const assetProfile = {
     expirationDate: new Date(2060, 11, 24).toString(),
@@ -95,7 +100,7 @@ export async function bridgeBackTokensBesu(frontendUser: string, amount: number,
     // since there is no link with the asset information,
     // we are just passing the asset parameters like this
     // [amountBeingTransferred, fabricID, ethAddress]
-    keyInformationLink: [amount.toString(), fabricID, address],
+    keyInformationLink: [amount.toString(), stellarId, address],
   };
 
   await axios.post(

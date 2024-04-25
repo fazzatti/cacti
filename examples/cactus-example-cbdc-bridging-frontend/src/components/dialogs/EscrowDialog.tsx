@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeEvent, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import DialogActions from "@mui/material/DialogActions";
@@ -8,14 +9,14 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
-import { escrowTokensFabric } from "../../api-calls/fabric-api";
+import { escrowTokensStellar } from "../../api-calls/stellar-api";
 import { escrowTokensBesu } from "../../api-calls/besu-api";
 
 export interface IEscrowDialogOptions {
-  open: boolean
-  user: string
-  ledger: string
-  onClose: () => any
+  open: boolean;
+  user: string;
+  ledger: string;
+  onClose: () => any;
 }
 
 export default function EscrowDialog(props: IEscrowDialogOptions) {
@@ -32,7 +33,9 @@ export default function EscrowDialog(props: IEscrowDialogOptions) {
     }
   }, [props.open]);
 
-  const handleChangeAmount = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleChangeAmount = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
     const value = parseInt(event.target.value);
 
     if (value < 0) {
@@ -49,8 +52,8 @@ export default function EscrowDialog(props: IEscrowDialogOptions) {
       setErrorMessage("Amount must be a positive value");
     } else {
       setSending(true);
-      if (props.ledger === "Fabric") {
-        await escrowTokensFabric(props.user, amount.toString(), assetRefID);
+      if (props.ledger === "Stellar") {
+        await escrowTokensStellar(props.user, amount.toString(), assetRefID);
       } else {
         await escrowTokensBesu(props.user, amount, assetRefID);
       }

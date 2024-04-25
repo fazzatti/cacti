@@ -38,27 +38,168 @@
           }
         }
       },
-      "RunTransactionRequest": {
+      "TransactionInvocation": {
         "type": "object",
-        "additionalProperties": false,
+        "required": ["header", "signers"],
         "properties": {
-          
+          "header": {
+            "$ref": "#/components/schemas/TransactionHeader"
+          },
+          "signers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^S[a-zA-Z0-9]{55}$",
+              "nullable": false,
+              "minLength": 56,
+              "maxLength": 56,
+              "description": "The secret key of the account that will sign the transaction."
+            },
+            "nullable": false
+          }
         }
       },
-      "RunTransactionResponse": {
+      "TransactionHeader": {
+        "type": "object",
+        "required": ["source", "fee", "timeout"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "pattern": "^G[a-zA-Z0-9]{55}$",
+            "nullable": false,
+            "minLength": 56,
+            "maxLength": 56,
+            "description": "The public key of the source account of the transaction."
+          },
+          "fee": {
+            "type": "integer",
+            "nullable": false,
+            "minimum": 100,
+            "description": "The maximum base fee in stroops to be paid for the transaction."
+          },
+          "timeout": {
+            "type": "integer",
+            "nullable": false,
+            "minimum": 0,
+            "description": "The maximum number of ledger close time in seconds that the transaction is valid for. '0' equals to no timeout."
+          }
+        }
+      },
+      "RunSorobanTransactionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contractId",
+          "method",
+          "specXdr",
+          "transactionInvocation"
+        ],
+        "properties": {
+          "contractId": {
+            "type": "string",
+            "pattern": "^C[a-zA-Z0-9]{55}$",
+            "nullable": false,
+            "minLength": 56,
+            "maxLength": 56,
+            "description": "The ID of the contract that was deployed."
+          },
+          "specXdr": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": false,
+            "description": "Array of strings containing the XDR of the contract specification."
+          },
+          "method": {
+            "type": "string",
+            "nullable": false,
+            "description": "The method to be called on the contract."
+          },
+          "methodArgs": {
+            "type": "object",
+            "nullable": true,
+            "description": "The arguments to pass to the method."
+          },
+          "transactionInvocation": {
+            "$ref": "#/components/schemas/TransactionInvocation",
+            "nullable": false,
+            "description": "The transaction invocation that will be used to run the contract."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Flag indicating if the transaction should be read-only."
+          }
+        }
+      },
+
+      "RunSorobanTransactionResponse": {
         "type": "object",
         "properties": {
-        }
+          "result": {
+            "type": "object",
+            "description": "The result of the invoked contract method."
+          }
+        },
+        "description": "Response object containing the result of a contract invocation or error information if it failed."
       },
       "DeployContractV1Request": {
         "type": "object",
         "additionalProperties": false,
+        "required": ["transactionInvocation"],
+        "anyOf": [
+          {
+            "required": ["wasmHash"]
+          },
+          {
+            "required": ["wasmBuffer"]
+          }
+        ],
         "properties": {
+          "wasmHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": true,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The hash of the wasm code installed in the ledger to be deployed into a new instance."
+          },
+          "wasmBuffer": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "minLength": 100,
+            "maxLength": 87382,
+            "description": "A Base64-encoded string that contains the binary data of the WASM code. This buffer is used to deploy WebAssembly code to the ledger."
+          },
+          "transactionInvocation": {
+            "$ref": "#/components/schemas/TransactionInvocation",
+            "nullable": true,
+            "description": "The transaction invocation that will be used to deploy the contract."
+          }
         }
       },
       "DeployContractV1Response": {
         "type": "object",
+        "required": ["contractId", "wasmHash"],
         "properties": {
+          "contractId": {
+            "type": "string",
+            "pattern": "^C[a-f0-9]{55}$",
+            "nullable": true,
+            "minLength": 56,
+            "maxLength": 56,
+            "description": "The ID of the contract that was deployed."
+          },
+          "wasmHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": true,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The hash of the wasm code installed in the ledger."
+          }
         }
       },
       "PrometheusExporterMetricsResponse": {
@@ -127,22 +268,22 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-transaction": {
+    "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-soroban-transaction": {
       "post": {
         "x-hyperledger-cacti": {
           "http": {
             "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-transaction"
+            "path": "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-soroban-transaction"
           }
         },
-        "operationId": "runTransactionV1",
-        "summary": "Executes a transaction on a stellar ledger",
+        "operationId": "runSorobanTransactionV1",
+        "summary": "Executes a Soroban transaction on a stellar ledger",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RunTransactionRequest"
+                "$ref": "#/components/schemas/RunSorobanTransactionRequest"
               }
             }
           }
@@ -153,7 +294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RunTransactionResponse"
+                  "$ref": "#/components/schemas/RunSorobanTransactionResponse"
                 }
               }
             }

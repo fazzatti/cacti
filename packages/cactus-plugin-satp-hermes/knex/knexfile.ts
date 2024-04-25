@@ -1,5 +1,7 @@
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+// import path from "path";
+// import { v4 as uuidv4 } from "uuid";
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
 // default configuration for knex
 module.exports = {

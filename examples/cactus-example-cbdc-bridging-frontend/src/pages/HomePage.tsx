@@ -19,20 +19,23 @@ export default function HomePage() {
       await checkApiServer2Connection()
         .then(() => setErrorDialog(false))
         .catch(() => setErrorDialog(true));
-    }
+    };
 
     checkConnection();
   }, []);
 
   return (
     <div style={{ width: "95%", margin: "4rem auto" }}>
-      <Grid container sx={{
-        width: "95%",
-        margin: "2rem auto",
-        textAlign: "center",
-      }}>
+      <Grid
+        container
+        sx={{
+          width: "95%",
+          margin: "2rem auto",
+          textAlign: "center",
+        }}
+      >
         <Grid item sm={12} md={5}>
-          <Ledger ledger={"Fabric"} />
+          <Ledger ledger={"Stellar"} />
         </Grid>
         <Grid item sm={12} md={2}>
           <BridgeImage />

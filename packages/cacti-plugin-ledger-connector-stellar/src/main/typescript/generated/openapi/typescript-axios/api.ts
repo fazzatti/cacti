@@ -26,6 +26,150 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
+ * @interface DeployContractV1Request
+ */
+export interface DeployContractV1Request {
+    /**
+     * The hash of the wasm code installed in the ledger to be deployed into a new instance.
+     * @type {string}
+     * @memberof DeployContractV1Request
+     */
+    'wasmHash'?: string | null;
+    /**
+     * A Base64-encoded string that contains the binary data of the WASM code. This buffer is used to deploy WebAssembly code to the ledger.
+     * @type {string}
+     * @memberof DeployContractV1Request
+     */
+    'wasmBuffer'?: string | null;
+    /**
+     * 
+     * @type {TransactionInvocation}
+     * @memberof DeployContractV1Request
+     */
+    'transactionInvocation': TransactionInvocation;
+}
+/**
+ * 
+ * @export
+ * @interface DeployContractV1Response
+ */
+export interface DeployContractV1Response {
+    /**
+     * The ID of the contract that was deployed.
+     * @type {string}
+     * @memberof DeployContractV1Response
+     */
+    'contractId': string | null;
+    /**
+     * The hash of the wasm code installed in the ledger.
+     * @type {string}
+     * @memberof DeployContractV1Response
+     */
+    'wasmHash': string | null;
+}
+/**
+ * 
+ * @export
+ * @interface RunSorobanTransactionRequest
+ */
+export interface RunSorobanTransactionRequest {
+    /**
+     * The ID of the contract that was deployed.
+     * @type {string}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'contractId': string;
+    /**
+     * Array of strings containing the XDR of the contract specification.
+     * @type {Array<string>}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'specXdr': Array<string>;
+    /**
+     * The method to be called on the contract.
+     * @type {string}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'method': string;
+    /**
+     * The arguments to pass to the method.
+     * @type {object}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'methodArgs'?: object | null;
+    /**
+     * 
+     * @type {TransactionInvocation}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'transactionInvocation': TransactionInvocation;
+    /**
+     * Flag indicating if the transaction should be read-only.
+     * @type {boolean}
+     * @memberof RunSorobanTransactionRequest
+     */
+    'readOnly'?: boolean | null;
+}
+/**
+ * Response object containing the result of a contract invocation or error information if it failed.
+ * @export
+ * @interface RunSorobanTransactionResponse
+ */
+export interface RunSorobanTransactionResponse {
+    /**
+     * The result of the invoked contract method.
+     * @type {object}
+     * @memberof RunSorobanTransactionResponse
+     */
+    'result'?: object;
+}
+/**
+ * 
+ * @export
+ * @interface TransactionHeader
+ */
+export interface TransactionHeader {
+    /**
+     * The public key of the source account of the transaction.
+     * @type {string}
+     * @memberof TransactionHeader
+     */
+    'source': string;
+    /**
+     * The maximum base fee in stroops to be paid for the transaction.
+     * @type {number}
+     * @memberof TransactionHeader
+     */
+    'fee': number;
+    /**
+     * The maximum number of ledger close time in seconds that the transaction is valid for. \'0\' equals to no timeout.
+     * @type {number}
+     * @memberof TransactionHeader
+     */
+    'timeout': number;
+}
+/**
+ * 
+ * @export
+ * @interface TransactionInvocation
+ */
+export interface TransactionInvocation {
+    /**
+     * 
+     * @type {TransactionHeader}
+     * @memberof TransactionInvocation
+     */
+    'header': TransactionHeader;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TransactionInvocation
+     */
+    'signers': Array<string>;
+}
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -63,11 +207,11 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * 
          * @summary Deploys a smart contract to the Stellar ledger associated with the connector.
-         * @param {object} [body] 
+         * @param {DeployContractV1Request} [deployContractV1Request] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deployContractV1: async (body?: object, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deployContractV1: async (deployContractV1Request?: DeployContractV1Request, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/deploy-contract`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -87,7 +231,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(deployContractV1Request, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -156,13 +300,13 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
         },
         /**
          * 
-         * @summary Executes a transaction on a stellar ledger
-         * @param {object} [body] 
+         * @summary Executes a Soroban transaction on a stellar ledger
+         * @param {RunSorobanTransactionRequest} [runSorobanTransactionRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        runTransactionV1: async (body?: object, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-transaction`;
+        runSorobanTransactionV1: async (runSorobanTransactionRequest?: RunSorobanTransactionRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-soroban-transaction`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -181,7 +325,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(runSorobanTransactionRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -201,12 +345,12 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Deploys a smart contract to the Stellar ledger associated with the connector.
-         * @param {object} [body] 
+         * @param {DeployContractV1Request} [deployContractV1Request] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deployContractV1(body?: object, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deployContractV1(body, options);
+        async deployContractV1(deployContractV1Request?: DeployContractV1Request, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeployContractV1Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deployContractV1(deployContractV1Request, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -231,13 +375,13 @@ export const DefaultApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Executes a transaction on a stellar ledger
-         * @param {object} [body] 
+         * @summary Executes a Soroban transaction on a stellar ledger
+         * @param {RunSorobanTransactionRequest} [runSorobanTransactionRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async runTransactionV1(body?: object, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<object>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.runTransactionV1(body, options);
+        async runSorobanTransactionV1(runSorobanTransactionRequest?: RunSorobanTransactionRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunSorobanTransactionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.runSorobanTransactionV1(runSorobanTransactionRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -253,12 +397,12 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         /**
          * 
          * @summary Deploys a smart contract to the Stellar ledger associated with the connector.
-         * @param {object} [body] 
+         * @param {DeployContractV1Request} [deployContractV1Request] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deployContractV1(body?: object, options?: any): AxiosPromise<object> {
-            return localVarFp.deployContractV1(body, options).then((request) => request(axios, basePath));
+        deployContractV1(deployContractV1Request?: DeployContractV1Request, options?: any): AxiosPromise<DeployContractV1Response> {
+            return localVarFp.deployContractV1(deployContractV1Request, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -280,13 +424,13 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         },
         /**
          * 
-         * @summary Executes a transaction on a stellar ledger
-         * @param {object} [body] 
+         * @summary Executes a Soroban transaction on a stellar ledger
+         * @param {RunSorobanTransactionRequest} [runSorobanTransactionRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        runTransactionV1(body?: object, options?: any): AxiosPromise<object> {
-            return localVarFp.runTransactionV1(body, options).then((request) => request(axios, basePath));
+        runSorobanTransactionV1(runSorobanTransactionRequest?: RunSorobanTransactionRequest, options?: any): AxiosPromise<RunSorobanTransactionResponse> {
+            return localVarFp.runSorobanTransactionV1(runSorobanTransactionRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -301,13 +445,13 @@ export class DefaultApi extends BaseAPI {
     /**
      * 
      * @summary Deploys a smart contract to the Stellar ledger associated with the connector.
-     * @param {object} [body] 
+     * @param {DeployContractV1Request} [deployContractV1Request] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public deployContractV1(body?: object, options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).deployContractV1(body, options).then((request) => request(this.axios, this.basePath));
+    public deployContractV1(deployContractV1Request?: DeployContractV1Request, options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).deployContractV1(deployContractV1Request, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -334,14 +478,14 @@ export class DefaultApi extends BaseAPI {
 
     /**
      * 
-     * @summary Executes a transaction on a stellar ledger
-     * @param {object} [body] 
+     * @summary Executes a Soroban transaction on a stellar ledger
+     * @param {RunSorobanTransactionRequest} [runSorobanTransactionRequest] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DefaultApi
      */
-    public runTransactionV1(body?: object, options?: AxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).runTransactionV1(body, options).then((request) => request(this.axios, this.basePath));
+    public runSorobanTransactionV1(runSorobanTransactionRequest?: RunSorobanTransactionRequest, options?: AxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).runSorobanTransactionV1(runSorobanTransactionRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

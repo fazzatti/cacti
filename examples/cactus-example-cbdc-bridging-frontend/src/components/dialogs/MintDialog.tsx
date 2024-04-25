@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, ChangeEvent } from "react";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -7,16 +8,16 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
-import { mintTokensFabric } from "../../api-calls/fabric-api";
+import { mintTokensStellar } from "../../api-calls/stellar-api";
 
 export interface IMintDialogOptions {
-  open: boolean
-  user: string
-  onClose: () => any
+  open: boolean;
+  user: string;
+  onClose: () => any;
 }
 
 export default function MintDialog(props: IMintDialogOptions) {
-  const [amount, setAmount] = useState<Number>(0);
+  const [amount, setAmount] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [sending, setSending] = useState<boolean>(false);
 
@@ -27,7 +28,9 @@ export default function MintDialog(props: IMintDialogOptions) {
     }
   }, [props.open]);
 
-  const handleChangeAmount = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleChangeAmount = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
     const value = parseInt(event.target.value);
 
     if (value < 0) {
@@ -44,7 +47,7 @@ export default function MintDialog(props: IMintDialogOptions) {
       setErrorMessage("Amount must be a positive value");
     } else {
       setSending(true);
-      await mintTokensFabric(props.user, amount.toString());
+      await mintTokensStellar(props.user, amount.toString());
       props.onClose();
     }
   };

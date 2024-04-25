@@ -1,4 +1,4 @@
-import path from "path";
+const path = require("path");
 
 // default configuration for knex
 module.exports = {

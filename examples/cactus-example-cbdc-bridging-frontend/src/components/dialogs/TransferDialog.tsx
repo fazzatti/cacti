@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, ChangeEvent } from "react";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -9,15 +10,15 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
-import { transferTokensFabric } from "../../api-calls/fabric-api";
+import { transferTokensStellar } from "../../api-calls/stellar-api";
 import { transferTokensBesu } from "../../api-calls/besu-api";
 
 const recipients = ["Alice", "Charlie", "Bridge"];
 export interface ITransferDialogOptions {
-  open: boolean
-  ledger: string
-  user: string
-  onClose: () => any
+  open: boolean;
+  ledger: string;
+  user: string;
+  onClose: () => any;
 }
 
 export default function TransferDialog(props: ITransferDialogOptions) {
@@ -34,7 +35,9 @@ export default function TransferDialog(props: ITransferDialogOptions) {
     }
   }, [props.open]);
 
-  const handleChangeAmount = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleChangeAmount = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
     const value = parseInt(event.target.value);
 
     if (value < 0) {
@@ -55,8 +58,8 @@ export default function TransferDialog(props: ITransferDialogOptions) {
       setErrorMessage("Amount must be a positive value");
     } else {
       setSending(true);
-      if (props.ledger === "Fabric") {
-        await transferTokensFabric(props.user, recipient, amount.toString());
+      if (props.ledger === "Stellar") {
+        await transferTokensStellar(props.user, recipient, amount.toString());
       } else {
         await transferTokensBesu(props.user, recipient, amount);
       }

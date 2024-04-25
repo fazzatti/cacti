@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -9,9 +10,9 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import Alert from "@mui/material/Alert";
 import {
-  bridgeOutTokensFabric,
-  getAssetReferencesFabric,
-} from "../../api-calls/fabric-api";
+  bridgeOutTokensStellar,
+  getAssetReferencesStellar,
+} from "../../api-calls/stellar-api";
 import { AssetReference } from "../../models/AssetReference";
 
 export interface IBridgeOutDialogOptions {
@@ -28,8 +29,10 @@ export default function BridgeOutDialog(props: IBridgeOutDialogOptions) {
 
   useEffect(() => {
     async function fetchData() {
-      const list = await getAssetReferencesFabric(props.user);
-      setAssetRefs(list.filter((asset: AssetReference) => asset.recipient === props.user));
+      const list = await getAssetReferencesStellar(props.user);
+      setAssetRefs(
+        list.filter((asset: AssetReference) => asset.recipient === props.user),
+      );
     }
 
     if (props.open) {
@@ -48,14 +51,18 @@ export default function BridgeOutDialog(props: IBridgeOutDialogOptions) {
       setErrorMessage("Please choose a valid Asset Reference ID");
     } else {
       setSending(true);
-      const assetRef = assetRefs.find(
-        (asset) => asset.id === assetRefID,
-      );
+      const assetRef = assetRefs.find((asset) => asset.id === assetRefID);
       if (assetRef === undefined) {
         setErrorMessage("Something went wrong. Asset Reference not found");
         return;
       }
-      await bridgeOutTokensFabric(props.user, assetRef.numberTokens, assetRefID);
+      await bridgeOutTokensStellar(
+        props.user,
+        assetRef.numberTokens
+          ? assetRef.numberTokens
+          : (assetRef.amount as number).toString(), // Convert to string
+        assetRefID,
+      );
       props.onClose();
     }
   };

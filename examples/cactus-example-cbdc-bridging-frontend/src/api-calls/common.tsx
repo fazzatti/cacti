@@ -15,18 +15,44 @@ export function getUserFromPseudonim(user: string) {
   }
 }
 
-export function getFabricId(user: string) {
+export function getStellarPk(user: string): string {
   switch (getUserFromPseudonim(user)) {
     case "userA":
-      return CryptoMaterial.accounts["userA"].fabricID;
+      return CryptoMaterial.accounts["userA"].stellarPk;
     case "userB":
-      return CryptoMaterial.accounts["userB"].fabricID;
+      return CryptoMaterial.accounts["userB"].stellarPk;
     case "bridge":
-      return CryptoMaterial.accounts["bridge"].fabricID;
+      return CryptoMaterial.accounts["bridge"].stellarPk;
     default:
-      break;
+      throw Error("Invalid user provided");
   }
 }
+
+export function getStellarSk(user: string): string {
+  switch (getUserFromPseudonim(user)) {
+    case "userA":
+      return CryptoMaterial.accounts["userA"].stellarSk;
+    case "userB":
+      return CryptoMaterial.accounts["userB"].stellarSk;
+    case "bridge":
+      return CryptoMaterial.accounts["bridge"].stellarSk;
+    default:
+      throw Error("Invalid user provided");
+  }
+}
+
+// export function getFabricId(user: string) {
+//   switch (getUserFromPseudonim(user)) {
+//     case "userA":
+//       return CryptoMaterial.accounts["userA"].fabricID;
+//     case "userB":
+//       return CryptoMaterial.accounts["userB"].fabricID;
+//     case "bridge":
+//       return CryptoMaterial.accounts["bridge"].fabricID;
+//     default:
+//       break;
+//   }
+// }
 
 export function getEthAddress(user: string) {
   switch (getUserFromPseudonim(user)) {

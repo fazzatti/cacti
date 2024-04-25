@@ -1,13 +1,5 @@
 # `@hyperledger/cacti-plugin-ledger-connector-stellar`
 
-
-## 🚧 **Package Under Construction** 🚧
-
-This package is a skeleton for now with no exported modules at all.
-Stay tuned for later improvements.
-
-## 🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧
-
 This plugin provides `Cacti` a way to interact with Stellar networks. Using this we can perform:
 * Deploy Smart-contracts over the network.
 * Build and sign transactions using different keystores.
