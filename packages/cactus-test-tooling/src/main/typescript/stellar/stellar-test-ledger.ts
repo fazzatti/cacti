@@ -1,4 +1,8 @@
-import Docker, { Container, ContainerCreateOptions } from "dockerode";
+import Docker, {
+  Container,
+  ContainerCreateOptions,
+  ContainerInfo,
+} from "dockerode";
 import { ITestLedger } from "../i-test-ledger";
 import {
   Bools,
@@ -10,15 +14,14 @@ import { Containers } from "../public-api";
 import EventEmitter from "events";
 
 export interface IStellarTestLedger extends ITestLedger {
-  getNetworkConfiguration(): INetworkConfig;
+  getNetworkConfiguration(): Promise<INetworkConfigData>;
 }
 
 export enum SupportedImageVersions {
   latest = "latest",
 }
 
-export interface INetworkConfig {
-  name: string;
+export interface INetworkConfigData {
   networkPassphrase: string;
   rpcUrl?: string;
   horizonUrl?: string;
@@ -138,6 +141,42 @@ export class StellarTestLedger implements IStellarTestLedger {
     }
   }
 
+  protected async getContainerInfo(): Promise<ContainerInfo> {
+    const fnTag = "StellarTestLedger#getContainerInfo()";
+    const docker = new Docker();
+    const image = this.containerImageName;
+    const containerInfos = await docker.listContainers({});
+
+    let aContainerInfo;
+    if (this.containerId !== undefined) {
+      aContainerInfo = containerInfos.find((ci) => ci.Id === this.containerId);
+    }
+
+    if (aContainerInfo) {
+      return aContainerInfo;
+    } else {
+      throw new Error(`${fnTag} no image "${image}"`);
+    }
+  }
+
+  public async getContainerIpAddress(): Promise<string> {
+    const fnTag = "StellarTestLedger#getContainerIpAddress()";
+    const aContainerInfo = await this.getContainerInfo();
+
+    if (aContainerInfo) {
+      const { NetworkSettings } = aContainerInfo;
+      const networkNames: string[] = Object.keys(NetworkSettings.Networks);
+      if (networkNames.length < 1) {
+        throw new Error(`${fnTag} container not connected to any networks`);
+      } else {
+        // return IP address of container on the first network that we found
+        return NetworkSettings.Networks[networkNames[0]].IPAddress;
+      }
+    } else {
+      throw new Error(`${fnTag} cannot find image: ${this.containerImageName}`);
+    }
+  }
+
   private getImageCommands(): string[] {
     const cmds = [];
 
@@ -170,21 +209,25 @@ export class StellarTestLedger implements IStellarTestLedger {
     return cmds;
   }
 
-  public getNetworkConfiguration(): INetworkConfig {
+  public async getNetworkConfiguration(): Promise<INetworkConfigData> {
     if (this.network != "local") {
       throw new Error(
         `StellarTestLedger#getNetworkConfiguration() network ${this.network} not supported yet.`,
       );
     }
+    const cInfo = await this.getContainerInfo();
+    const publicPort = await Containers.getPublicPort(8000, cInfo);
 
-    return {
-      name: "custom",
-      networkPassphrase: "Test SDF Network ; September 2015",
-      rpcUrl: "http://localhost:8000/rpc",
-      horizonUrl: "http://localhost:8000",
-      friendbotUrl: "http://localhost:8000/friendbot",
+    // Default docker internal domain. Redirects to the local host where docker is running.
+    const domain = "host.docker.internal";
+
+    return Promise.resolve({
+      networkPassphrase: "Standalone Network ; February 2017",
+      rpcUrl: `http://${domain}:${publicPort}/rpc`,
+      horizonUrl: `http://${domain}:${publicPort}`,
+      friendbotUrl: `http://${domain}:${publicPort}/friendbot`,
       allowHttp: true,
-    };
+    });
   }
 
   /**
@@ -226,14 +269,12 @@ export class StellarTestLedger implements IStellarTestLedger {
     }
 
     const createOptions: ContainerCreateOptions = {
-      // ExposedPorts: {
-      //   "8008/tcp": {}, // Rest API
-      // },
-      // Env: this.envVars,
+      ExposedPorts: {
+        "8000/tcp": {}, // Stellar services (Horizon, RPC and Friendbot)
+      },
       HostConfig: {
         PublishAllPorts: true,
         Privileged: true,
-        // AutoRemove: true,
       },
     };
 
@@ -266,7 +307,14 @@ export class StellarTestLedger implements IStellarTestLedger {
         }
 
         try {
+          // FIXME: This is a hack to wait for the container to be ready
+          // ideally we should verify when the container is ready to accept requests
+          //
           // await Containers.waitForHealthCheck(this.containerId);
+          this.log.info("Waiting for services to fully start.");
+          await new Promise((resolve) => setTimeout(resolve, 25000));
+          this.log.info("Stellar Test Ledger is ready.");
+
           resolve(container);
         } catch (ex) {
           this.log.error(ex);
