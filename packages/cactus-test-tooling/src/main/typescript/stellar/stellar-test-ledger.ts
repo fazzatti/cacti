@@ -313,13 +313,24 @@ export class StellarTestLedger implements IStellarTestLedger {
       },
     };
 
+    const Healthcheck = {
+      Test: [
+        "CMD-SHELL",
+        "curl -s -o /dev/null -w '%{http_code}' http://localhost:8000 | grep -q '200' && curl -s -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\": \"2.0\", \"id\": 8675309, \"method\": \"getHealth\"}' http://localhost:8000/rpc | grep -q 'healthy' && curl -s http://localhost:8000/friendbot | grep -q '\"status\": 400' || exit 1",
+      ],
+      Interval: 1000000000, // 1 second
+      Timeout: 3000000000, // 3 seconds
+      Retries: 60,
+      StartPeriod: 1000000000, // 1 second
+    };
+
     return new Promise<Container>((resolve, reject) => {
       const docker = new Docker();
       const eventEmitter: EventEmitter = docker.run(
         this.fullContainerImageName,
         [...this.getImageCommands()],
         [],
-        createOptions,
+        { ...createOptions, Healthcheck: Healthcheck },
         {},
         (err: unknown) => {
           if (err) {
@@ -342,14 +353,9 @@ export class StellarTestLedger implements IStellarTestLedger {
         }
 
         try {
-          // FIXME: This is a hack to wait for the container to be ready
-          // ideally we should verify when the container is ready to accept requests
-          //
-          // await Containers.waitForHealthCheck(this.containerId);
-          this.log.info("Waiting for services to fully start.");
-          await new Promise((resolve) => setTimeout(resolve, 25000));
-          this.log.info("Stellar Test Ledger is ready.");
-
+          this.log.debug("Waiting for services to fully start.");
+          await Containers.waitForHealthCheck(this.containerId);
+          this.log.debug("Stellar Test Ledger is ready.");
           resolve(container);
         } catch (ex) {
           this.log.error(ex);
