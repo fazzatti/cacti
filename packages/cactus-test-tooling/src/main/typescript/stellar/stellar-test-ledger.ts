@@ -15,12 +15,18 @@ import EventEmitter from "events";
 
 export interface IStellarTestLedger extends ITestLedger {
   getNetworkConfiguration(): Promise<INetworkConfigData>;
+  getContainer(): Container;
+  getContainerIpAddress(): Promise<string>;
 }
 
+// For now, only the latest version of the image is supported.
+// This enum can be expanded to support more versions in the future.
 export enum SupportedImageVersions {
   latest = "latest",
 }
 
+// This interface defines the network configuration data for the test stellar ledger.
+// This is used to manage the connections to different services necesary to interact with the ledger.
 export interface INetworkConfigData {
   networkPassphrase: string;
   rpcUrl?: string;
@@ -60,8 +66,6 @@ const DEFAULTS = Object.freeze({
   useRunningLedger: false,
   logLevel: "info" as LogLevelDesc,
   emitContainerLogs: false,
-
-  // cmdArgs: ['--local', '--limits','testnet']
 });
 
 export class StellarTestLedger implements IStellarTestLedger {
@@ -125,7 +129,9 @@ export class StellarTestLedger implements IStellarTestLedger {
   }
 
   /**
-   * Stellar ledger image name and tag
+   * Get the full container image name.
+   *
+   * @returns {string} Full container image name
    */
   public get fullContainerImageName(): string {
     return [this.containerImageName, this.containerImageVersion].join(":");
@@ -141,6 +147,12 @@ export class StellarTestLedger implements IStellarTestLedger {
     }
   }
 
+  /**
+   *
+   * Get the container information for the test stellar ledger.
+   *
+   * @returns {ContainerInfo} Container information
+   */
   protected async getContainerInfo(): Promise<ContainerInfo> {
     const fnTag = "StellarTestLedger#getContainerInfo()";
     const docker = new Docker();
@@ -159,6 +171,12 @@ export class StellarTestLedger implements IStellarTestLedger {
     }
   }
 
+  /**
+   *
+   * Get the IP address of the container.
+   *
+   * @returns {string} IP address of the container
+   */
   public async getContainerIpAddress(): Promise<string> {
     const fnTag = "StellarTestLedger#getContainerIpAddress()";
     const aContainerInfo = await this.getContainerInfo();
@@ -177,6 +195,12 @@ export class StellarTestLedger implements IStellarTestLedger {
     }
   }
 
+  /**
+   *
+   * Get the commands to pass to the docker container.
+   *
+   * @returns {string[]} Array of commands to pass to the docker container
+   */
   private getImageCommands(): string[] {
     const cmds = [];
 
@@ -209,6 +233,14 @@ export class StellarTestLedger implements IStellarTestLedger {
     return cmds;
   }
 
+  /**
+   *
+   * Get the network configuration data for the test stellar ledger.
+   * This includes the network passphrase, rpcUrl, horizonUrl,
+   * friendbotUrl, and the allowHttp flag.
+   *
+   * @returns {INetworkConfigData} Network configuration data
+   */
   public async getNetworkConfiguration(): Promise<INetworkConfigData> {
     if (this.network != "local") {
       throw new Error(
@@ -232,6 +264,9 @@ export class StellarTestLedger implements IStellarTestLedger {
 
   /**
    *  Start a test stellar ledger.
+   *
+   * @param {boolean} omitPull - If true, the image will not be pulled from the registry.
+   * @returns {Container} The container object.
    */
   public async start(omitPull = false): Promise<Container> {
     if (this.useRunningLedger) {
@@ -326,6 +361,8 @@ export class StellarTestLedger implements IStellarTestLedger {
 
   /**
    * Stop the test stellar ledger.
+   *
+   * @returns {Promise<unknown>} A promise that resolves when the ledger is stopped.
    */
   public async stop(): Promise<unknown> {
     if (this.useRunningLedger) {
@@ -338,6 +375,8 @@ export class StellarTestLedger implements IStellarTestLedger {
 
   /**
    * Destroy the test stellar ledger.
+   *
+   * @returns {Promise<unknown>} A promise that resolves when the ledger is destroyed.
    */
   public async destroy(): Promise<unknown> {
     if (this.useRunningLedger) {
