@@ -1,9 +1,9 @@
 import "jest-extended";
 import { Container } from "dockerode";
 import { StellarTestLedger } from "../../../../../main/typescript/public-api";
-import { SupportedImageVersions } from "../../../../../main/typescript/stellar/stellar-test-ledger";
 import axios from "axios";
 import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SupportedImageVersions } from "../../../../../main/typescript/stellar/supported-image-versions";
 
 describe("StellarTestLEdger", () => {
   const logLevel: LogLevelDesc = "TRACE";
