@@ -12,17 +12,14 @@ import {
 } from "@hyperledger/cactus-common";
 import { Containers } from "../public-api";
 import EventEmitter from "events";
+import { SupportedImageVersions } from "./supported-image-versions";
+import { Network } from "./network";
+import { ResourceLimits } from "./resource-limits";
 
 export interface IStellarTestLedger extends ITestLedger {
   getNetworkConfiguration(): Promise<INetworkConfigData>;
   getContainer(): Container;
   getContainerIpAddress(): Promise<string>;
-}
-
-// For now, only the latest version of the image is supported.
-// This enum can be expanded to support more versions in the future.
-export enum SupportedImageVersions {
-  latest = "latest",
 }
 
 // This interface defines the network configuration data for the test stellar ledger.
@@ -37,17 +34,11 @@ export interface INetworkConfigData {
 
 export interface IStellarTestLedgerOptions {
   // Defines which type of network will the image will be configured to run.
-  network?:
-    | "local" // (Default) pull up a new pristine network image locally.
-    | "futurenet" // pull up an image to connect to futurenet. Can take several minutes to sync the ledger state.
-    | "testnet"; // pull up an image to connect to testnet  Can take several minutes to sync the ledger state.
+  network?: Network;
 
   // Defines the resource limits for soroban transactions. A valid transaction and only be included in a ledger
   // block if enough resources are available for that operation.
-  limits?:
-    | "testnet" // (Default) sets the limits to match those used on testnet.
-    | "default" // leaves resource limits set extremely low as per Stellar's core default configuration
-    | "unlimited"; // set limits to maximum resources that can be configfured
+  limits?: ResourceLimits;
 
   // For test development, attach to ledger that is already running, don't spin up new one
   useRunningLedger?: boolean;
@@ -60,9 +51,9 @@ export interface IStellarTestLedgerOptions {
 
 const DEFAULTS = Object.freeze({
   imageName: "stellar/quickstart",
-  imageVersion: SupportedImageVersions.latest,
-  network: "local",
-  limits: "testnet",
+  imageVersion: SupportedImageVersions.LASTEST,
+  network: Network.LOCAL,
+  limits: ResourceLimits.TESTNET,
   useRunningLedger: false,
   logLevel: "info" as LogLevelDesc,
   emitContainerLogs: false,
@@ -86,12 +77,12 @@ export class StellarTestLedger implements IStellarTestLedger {
     this.network = options?.network || DEFAULTS.network;
     this.limits = options?.limits || DEFAULTS.limits;
 
-    if (this.network != "local") {
+    if (this.network != Network.LOCAL) {
       throw new Error(
         `StellarTestLedger#constructor() network ${this.network} not supported yet.`,
       );
     }
-    if (this.limits != "testnet") {
+    if (this.limits != Network.TESTNET) {
       throw new Error(
         `StellarTestLedger#constructor() limits ${this.limits} not supported yet.`,
       );
@@ -205,26 +196,26 @@ export class StellarTestLedger implements IStellarTestLedger {
     const cmds = [];
 
     switch (this.network) {
-      case "futurenet":
+      case Network.FUTURENET:
         cmds.push("--futurenet");
         break;
-      case "testnet":
+      case Network.TESTNET:
         cmds.push("--testnet");
         break;
-      case "local":
+      case Network.LOCAL:
       default:
         cmds.push("--local");
         break;
     }
 
     switch (this.limits) {
-      case "default":
+      case ResourceLimits.DEFAULT:
         cmds.push("--limits", "default");
         break;
-      case "unlimited":
+      case ResourceLimits.UNLIMITED:
         cmds.push("--limits", "unlimited");
         break;
-      case "testnet":
+      case ResourceLimits.TESTNET:
       default:
         cmds.push("--limits", "testnet");
         break;
@@ -320,7 +311,7 @@ export class StellarTestLedger implements IStellarTestLedger {
       ],
       Interval: 1000000000, // 1 second
       Timeout: 3000000000, // 3 seconds
-      Retries: 60,
+      Retries: 120, // 120 retries over 2 min should be enough for a big variety of systems
       StartPeriod: 1000000000, // 1 second
     };
 
