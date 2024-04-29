@@ -23,7 +23,7 @@ export interface IStellarTestLedger extends ITestLedger {
 }
 
 // This interface defines the network configuration data for the test stellar ledger.
-// This is used to manage the connections to different services necesary to interact with the ledger.
+// This is used to manage the connections to different services necessary to interact with the ledger.
 export interface INetworkConfigData {
   networkPassphrase: string;
   rpcUrl?: string;
@@ -59,6 +59,20 @@ const DEFAULTS = Object.freeze({
   emitContainerLogs: false,
 });
 
+/**
+ * This class provides the functionality to start and stop a test stellar ledger.
+ * The ledger is started as a docker container and can be configured to run on different networks.
+ *
+ * @param {IStellarTestLedgerOptions} options - Options for the test stellar ledger.
+ * @param {Network} options.network - Defines which type of network will the image will be configured to run.
+ * @param {ResourceLimits} options.limits - Defines the resource limits for soroban transactions.
+ * @param {boolean} options.useRunningLedger - For test development, attach to ledger that is already running, don't spin up new one.
+ * @param {LogLevelDesc} options.logLevel - The log level for the test stellar ledger.
+ * @param {string} options.containerImageName - The name of the container image to use for the test stellar ledger.
+ * @param {SupportedImageVersions} options.containerImageVersion - The version of the container image to use for the test stellar ledger.
+ * @param {boolean} options.emitContainerLogs - If true, the container logs will be emitted.
+ *
+ */
 export class StellarTestLedger implements IStellarTestLedger {
   public readonly containerImageName: string;
   public readonly containerImageVersion: SupportedImageVersions;
@@ -296,7 +310,7 @@ export class StellarTestLedger implements IStellarTestLedger {
 
     const createOptions: ContainerCreateOptions = {
       ExposedPorts: {
-        "8000/tcp": {}, // Stellar services (Horizon, RPC and Friendbot)
+        "8000/tcp": {}, // Stellar services will use this port (Horizon, RPC and Friendbot)
       },
       HostConfig: {
         PublishAllPorts: true,
