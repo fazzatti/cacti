@@ -115,7 +115,7 @@ describe(testCaseName, () => {
             fee: 100,
             timeout: 30,
           },
-          signers: [(deployerAccount as any).secretKey],
+          signers: [deployerAccount.getSecretKey()],
         },
       });
 
@@ -135,7 +135,7 @@ describe(testCaseName, () => {
             fee: 100,
             timeout: 30,
           },
-          signers: [(deployerAccount as any).secretKey],
+          signers: [deployerAccount.getSecretKey()],
         },
       });
       const { contractId, wasmHash } = responseFromDeployedWasm;
@@ -148,7 +148,7 @@ describe(testCaseName, () => {
             fee: 100,
             timeout: 30,
           },
-          signers: [(deployerAccount as any).secretKey],
+          signers: [deployerAccount.getSecretKey()],
         },
       });
 
@@ -176,7 +176,7 @@ describe(testCaseName, () => {
               fee: 100,
               timeout: 30,
             },
-            signers: [(deployerAccount as any).secretKey],
+            signers: [deployerAccount.getSecretKey()],
           },
         }),
       ).rejects.toThrow(`${deployContractFnTag} Failed to upload wasm.`);
@@ -193,7 +193,7 @@ describe(testCaseName, () => {
             fee: 100,
             timeout: 30,
           },
-          signers: [(deployerAccount as any).secretKey],
+          signers: [deployerAccount.getSecretKey()],
         },
       });
       const wasmHash = responseFromDeployedWasm.wasmHash;
@@ -207,7 +207,7 @@ describe(testCaseName, () => {
               fee: 100,
               timeout: 30,
             },
-            signers: [(deployerAccount as any).secretKey],
+            signers: [deployerAccount.getSecretKey()],
           },
         }),
       ).rejects.toThrow(`${deployContractFnTag} Failed to deploy contract.`);
