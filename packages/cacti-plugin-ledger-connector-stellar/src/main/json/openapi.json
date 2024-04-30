@@ -38,27 +38,127 @@
           }
         }
       },
+      "TransactionInvocation": {
+        "type": "object",
+        "required": ["header", "signers"],
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/TransactionHeader"
+          },
+          "signers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "nullable": false,
+              "minLength": 64,
+              "maxLength": 64,
+              "description": "The secret key of the account that will sign the transaction."
+            },
+            "nullable": false
+          }
+        }
+      },
+      "TransactionHeader": {
+        "type": "object",
+        "required": ["source", "fee", "timeout"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "nullable": false,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The public key of the source account of the transaction."
+          },
+          "fee": {
+            "type": "integer",
+            "nullable": false,
+            "minimum": 100,
+            "description": "The maximum base fee in stroops to be paid for the transaction."
+          },
+          "timeout": {
+            "type": "integer",
+            "nullable": false,
+            "minimum": 0,
+            "description": "The maximum number of ledger close time in seconds that the transaction is valid for. '0' equals to no timeout."
+          }
+        }
+      },
       "RunTransactionRequest": {
         "type": "object",
         "additionalProperties": false,
+        "required": ["transactionName"],
         "properties": {
-          
+          "transactionName": {
+            "type": "string",
+            "nullable": false,
+            "minLength": 0,
+            "maxLength": 100,
+            "description": "The name of the transaction to run"
+          }
         }
       },
+
       "RunTransactionResponse": {
         "type": "object",
-        "properties": {
-        }
+        "properties": {}
       },
       "DeployContractV1Request": {
         "type": "object",
         "additionalProperties": false,
+        "required": ["transactionInvocation"],
+        "anyOf": [
+          {
+            "required": ["wasmHash"]
+          },
+          {
+            "required": ["wasmBuffer"]
+          }
+        ],
         "properties": {
+          "wasmHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": true,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The hash of the wasm code installed in the ledger to be deployed into a new instance."
+          },
+          "wasmBuffer": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true,
+            "minLength": 100,
+            "maxLength": 87382,
+            "description": "A Base64-encoded string that contains the binary data of the WASM code. This buffer is used to deploy WebAssembly code to the ledger."
+          },
+          "transactionInvocation": {
+            "$ref": "#/components/schemas/TransactionInvocation",
+            "nullable": true,
+            "description": "The transaction invocation that will be used to deploy the contract."
+          }
         }
       },
       "DeployContractV1Response": {
         "type": "object",
+        "required": ["contractId", "wasmHash"],
         "properties": {
+          "contractId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": true,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The ID of the contract that was deployed."
+          },
+          "wasmHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": true,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The hash of the wasm code installed in the ledger."
+          }
         }
       },
       "PrometheusExporterMetricsResponse": {
