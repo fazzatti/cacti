@@ -1,11 +1,11 @@
 import "jest-extended";
 import { LogLevelDesc } from "@hyperledger/cactus-common";
-import { StellarTestLedger } from "@hyperledger/cactus-test-tooling";
 import { Network } from "stellar-plus/lib/stellar-plus";
 import { DefaultAccountHandler } from "stellar-plus/lib/stellar-plus/account";
 import { ClassicAssetHandler } from "stellar-plus/lib/stellar-plus/asset";
 import { TransactionInvocation } from "stellar-plus/lib/stellar-plus/types";
 import { NetworkConfig } from "stellar-plus/lib/stellar-plus/network";
+import { StellarTestLedger } from "@hyperledger/cactus-test-tooling";
 
 describe("PluginLedgerConnectorStellar", () => {
   const logLevel: LogLevelDesc = "TRACE";

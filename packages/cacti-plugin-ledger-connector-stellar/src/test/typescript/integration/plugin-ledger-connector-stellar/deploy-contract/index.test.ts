@@ -24,11 +24,11 @@ import {
 } from "../../../../../main/typescript/api-client/stellar-api-client";
 import { DefaultAccountHandler } from "stellar-plus/lib/stellar-plus/account";
 import { K_CACTUS_STELLAR_TOTAL_TX_COUNT } from "../../../../../main/typescript/prometheus-exporter/metrics";
+// import SorobanTokenWasm from "../../../../rust/token-contract/soroban_token_contract.wasm";
 
 const testCaseName = pluginName + " / deploys contracts";
 const deployContractFnTag = `PluginLedgerConnectorStellar#deployContract()`;
-const contractIdPattern = /^C[A-Z0-9]{55}$/;
-const wasmHashPattern = /^[a-f0-9]{64}$/;
+
 describe(testCaseName, () => {
   const logLevel: LogLevelDesc = "TRACE";
   const stellarTestLedger = new StellarTestLedger({ logLevel });
@@ -37,12 +37,14 @@ describe(testCaseName, () => {
   let connector: PluginLedgerConnectorStellar;
   let server: http.Server;
   let apiClient: StellarApiClient;
+  const contractIdPattern = /^C[A-Z0-9]{55}$/;
+  const wasmHashPattern = /^[a-f0-9]{64}$/;
 
   beforeAll(async () => {
     wasmBuffer = await loadWasmFile(
-      "/workspaces/cacti/packages/cacti-plugin-ledger-connector-stellar/src/main/typescript/contracts/test/soroban_token_contract.wasm",
-      // "./../../../../../main/typescript/contracts/test/soroban_token_contract.wasm",
+      "./packages/cacti-plugin-ledger-connector-stellar/src/test/rust/token-contract/soroban_token_contract.wasm",
     );
+    expect(wasmBuffer).toBeDefined();
 
     await stellarTestLedger.start();
     networkConfig = Network.CustomNet(
@@ -103,7 +105,7 @@ describe(testCaseName, () => {
   });
 
   describe("core features", () => {
-    it("can deploy a contract to the ledger with just the WASM file", async () => {
+    it("should deploy a contract to the ledger with just the WASM file", async () => {
       const deployerAccount = new DefaultAccountHandler({ networkConfig });
       await deployerAccount.initializeWithFriendbot();
 
@@ -124,7 +126,7 @@ describe(testCaseName, () => {
       expect(res.wasmHash).toMatch(wasmHashPattern);
     });
 
-    it("can deploy a contract to the ledger using the WASM hash of a previously deployed contract", async () => {
+    it("should deploy a contract to the ledger using the WASM hash of a previously deployed contract", async () => {
       const deployerAccount = new DefaultAccountHandler({ networkConfig });
       await deployerAccount.initializeWithFriendbot();
       const responseFromDeployedWasm = await connector.deployContract({
