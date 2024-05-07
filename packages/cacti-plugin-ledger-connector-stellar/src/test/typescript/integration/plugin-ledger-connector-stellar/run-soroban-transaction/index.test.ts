@@ -334,10 +334,6 @@ describe(testCaseName, () => {
     });
   });
 
-  // describe("contract invocation", () => {
-  //   it("should invoke a smart contract function to initialize a soroban contract", async () => {});
-  // });
-
   describe("Prometheus", () => {
     it("should provide transaction metrics", async () => {
       const promMetricsOutput =
