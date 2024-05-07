@@ -24,6 +24,8 @@ import {
 import {
   DeployContractV1Request,
   DeployContractV1Response,
+  RunSorobanTransactionRequest,
+  RunSorobanTransactionResponse,
   WatchBlocksV1,
 } from "./generated/openapi/typescript-axios";
 
@@ -35,7 +37,7 @@ import {
 } from "./web-services/get-open-api-spec-v1-endpoint";
 import { NetworkConfig } from "stellar-plus/lib/stellar-plus/network";
 import { PluginRegistry } from "@hyperledger/cactus-core";
-import { deployContract } from "./core/contract-engine";
+import { deployContract, invokeContract } from "./core/contract-engine";
 import { convertApiTransactionInvocationToStellarPlus } from "./utils";
 import {
   GetPrometheusExporterMetricsEndpointV1,
@@ -59,8 +61,8 @@ export class PluginLedgerConnectorStellar
     IPluginLedgerConnector<
       DeployContractV1Request,
       DeployContractV1Response,
-      never,
-      never
+      RunSorobanTransactionRequest,
+      RunSorobanTransactionResponse
     >,
     ICactusPlugin,
     IPluginWebService
@@ -128,20 +130,37 @@ export class PluginLedgerConnectorStellar
     this.prometheusExporter.addCurrentTransaction();
     return response;
   }
-  public async transact(): Promise<never> {
-    // const runClassicTransactionOptions = {
-    //   ...classicTransaction,
-    //   fnLogPrefix: this.className,
-    //   networkConfig: this.networkConfig,
-    // };
 
-    // const response = await runClassicTransaction(runClassicTransactionOptions);
-    // return {
-    //   response,
-    // };
+  public async runSorobanTransaction(
+    req: RunSorobanTransactionRequest,
+  ): Promise<RunSorobanTransactionResponse> {
+    const invokeArgs = {
+      ...req,
+      methodArgs: req.methodArgs ?? {},
+      networkConfig: this.networkConfig,
+      fnLogPrefix: this.className,
+      txInvocation: convertApiTransactionInvocationToStellarPlus(
+        req.transactionInvocation,
+        this.networkConfig,
+      ),
+    };
 
-    throw new InternalServerError("Method not implemented.");
+    const result = req.readOnly
+      ? await invokeContract<typeof invokeArgs.methodArgs>({
+          ...invokeArgs,
+          readOnly: true,
+        })
+      : await invokeContract<typeof invokeArgs.methodArgs>({
+          ...invokeArgs,
+          readOnly: false,
+        });
+
+    this.prometheusExporter.addCurrentTransaction();
+    return { result } as RunSorobanTransactionResponse;
   }
+
+  public transact = this.runSorobanTransaction; // FIXME: Review the interface
+
   public async getConsensusAlgorithmFamily(): Promise<ConsensusAlgorithmFamily> {
     throw new InternalServerError("Method not implemented.");
   }
