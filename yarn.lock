@@ -7375,7 +7375,7 @@ __metadata:
     rxjs: "npm:7.8.1"
     socket.io: "npm:4.5.4"
     socket.io-client-fixed-types: "npm:4.5.4"
-    stellar-plus: "npm:0.8.1"
+    stellar-plus: "npm:0.8.3"
     typescript-optional: "npm:2.0.1"
     uuid: "npm:9.0.1"
   languageName: unknown
@@ -46404,15 +46404,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stellar-plus@npm:0.8.1":
-  version: 0.8.1
-  resolution: "stellar-plus@npm:0.8.1"
+"stellar-plus@npm:0.8.3":
+  version: 0.8.3
+  resolution: "stellar-plus@npm:0.8.3"
   dependencies:
     "@stellar/freighter-api": "npm:^1.7.1"
     "@stellar/stellar-sdk": "npm:^11.2.2"
     axios: "npm:^1.6.2"
     uuid: "npm:^9.0.1"
-  checksum: 10/98c057a10966c9d1d1149840a7903039209d905d97615e7c38f0ab35bbecb4c28b4c9cb69748e386fd2dc3ab8ec978ad97dead1f5b150bde2b0f74dc659f11b8
+  checksum: 10/d209ce18be0060b194d2f8c2a0b305f9b19f1beefd3e23d25187f161e0a2ddfd650027beaf5bbedcc61f373ffa9f4c4c732b466146d41ce98793f39d66844e29
   languageName: node
   linkType: hard
 
