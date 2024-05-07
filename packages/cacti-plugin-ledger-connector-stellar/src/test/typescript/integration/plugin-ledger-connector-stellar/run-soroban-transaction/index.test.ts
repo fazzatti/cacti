@@ -25,7 +25,7 @@ import bodyParser from "body-parser";
 import { DefaultAccountHandler } from "stellar-plus/lib/stellar-plus/account";
 import { K_CACTUS_STELLAR_TOTAL_TX_COUNT } from "../../../../../main/typescript/prometheus-exporter/metrics";
 
-const testCaseName = pluginName + " / deploys contracts";
+const testCaseName = pluginName + " / run soroban transactions";
 const runSorobanTransactionFnTag = `PluginLedgerConnectorStellar#invokeContract()`;
 
 describe(testCaseName, () => {
