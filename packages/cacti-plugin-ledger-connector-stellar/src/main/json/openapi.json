@@ -84,24 +84,64 @@
           }
         }
       },
-      "RunTransactionRequest": {
+      "RunSorobanTransactionRequest": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["transactionName"],
+        "required": [
+          "contractId",
+          "method",
+          "specXdr",
+          "transactionInvocation"
+        ],
         "properties": {
-          "transactionName": {
+          "contractId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "nullable": false,
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "The ID of the contract that was deployed."
+          },
+          "specXdr": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": false,
+            "description": "Array of strings containing the XDR of the contract specification."
+          },
+          "method": {
             "type": "string",
             "nullable": false,
-            "minLength": 0,
-            "maxLength": 100,
-            "description": "The name of the transaction to run"
+            "description": "The method to be called on the contract."
+          },
+          "methodArgs": {
+            "type": "object",
+            "nullable": true,
+            "description": "The arguments to pass to the method."
+          },
+          "transactionInvocation": {
+            "$ref": "#/components/schemas/TransactionInvocation",
+            "nullable": false,
+            "description": "The transaction invocation that will be used to run the contract."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Flag indicating if the transaction should be read-only."
           }
         }
       },
 
-      "RunTransactionResponse": {
+      "RunSorobanTransactionResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "result": {
+            "type": "object",
+            "description": "The result of the invoked contract method."
+          }
+        },
+        "description": "Response object containing the result of a contract invocation or error information if it failed."
       },
       "DeployContractV1Request": {
         "type": "object",
@@ -227,22 +267,22 @@
         }
       }
     },
-    "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-transaction": {
+    "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-soroban-transaction": {
       "post": {
         "x-hyperledger-cacti": {
           "http": {
             "verbLowerCase": "post",
-            "path": "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-transaction"
+            "path": "/api/v1/plugins/@hyperledger/cacti-plugin-ledger-connector-stellar/run-soroban-transaction"
           }
         },
-        "operationId": "runTransactionV1",
-        "summary": "Executes a transaction on a stellar ledger",
+        "operationId": "runSorobanTransactionV1",
+        "summary": "Executes a Soroban transaction on a stellar ledger",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RunTransactionRequest"
+                "$ref": "#/components/schemas/RunSorobanTransactionRequest"
               }
             }
           }
@@ -253,7 +293,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RunTransactionResponse"
+                  "$ref": "#/components/schemas/RunSorobanTransactionResponse"
                 }
               }
             }
