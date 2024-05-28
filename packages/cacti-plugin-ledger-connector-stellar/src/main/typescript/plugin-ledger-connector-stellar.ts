@@ -35,6 +35,7 @@ import {
 export const E_KEYCHAIN_NOT_FOUND =
   "cacti.connector.stellar.keychain_not_found";
 
+const test = 'test';
 export interface IPluginLedgerConnectorStellarOptions
   extends ICactusPluginOptions {
   rpcApiHttpHost: string;
